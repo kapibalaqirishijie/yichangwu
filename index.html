@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>异常物对战v0.1</title>
   
-  <!-- 依赖 SDK（仅保留必要的核心依赖） -->
+  <!-- 仅保留必要依赖 -->
   <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.1/dist/av-min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
     AV.init({ appId, appKey, serverURL });
   </script>
   
-  <!-- Tailwind 配置（极简黑白+圆角设计） -->
+  <!-- Tailwind 配置（极简黑白+圆角） -->
   <script>
     tailwind.config = {
       theme: {
@@ -131,7 +131,7 @@
 
     <!-- 主内容区 -->
     <main>
-      <!-- 首页（匹配对战入口） -->
+      <!-- 首页（仅保留匹配和红龙预览，移除统计卡片） -->
       <section id="home-page" class="space-y-8">
         <!-- 匹配对战入口 -->
         <div class="card-style p-6 text-center">
@@ -165,7 +165,7 @@
       <section id="collection-page" class="hidden card-style p-6">
         <h2 class="text-xl font-bold mb-6">异常物图鉴</h2>
         <div id="collection-list" class="space-y-6">
-          <!-- 图鉴内容由 JS 动态加载 -->
+          <!-- 动态加载 -->
         </div>
       </section>
 
@@ -173,7 +173,7 @@
       <section id="nav-profile-page" class="hidden card-style p-6">
         <h2 class="text-xl font-bold mb-6">个人对战数据</h2>
         <div id="profile-data" class="space-y-4">
-          <!-- 个人数据由 JS 动态加载 -->
+          <!-- 动态加载 -->
         </div>
       </section>
 
@@ -198,7 +198,7 @@
           </div>
         </div>
         
-        <!-- 技能按钮（只有当前回合可点击） -->
+        <!-- 技能按钮 -->
         <div class="grid grid-cols-2 gap-4 mb-6" id="skill-container">
           <button id="skill1" class="btn-style p-4 pointer-events-none opacity-50">
             <p class="font-bold">烈焰突袭</p>
@@ -215,7 +215,7 @@
           <p class="text-gray-600">战斗开始！随机分配先手...</p>
         </div>
         
-        <!-- 战斗结果（默认隐藏） -->
+        <!-- 战斗结果 -->
         <div id="battle-result" class="hidden text-center text-xl font-bold py-4">
           <p id="result-text"></p>
           <button id="return-home" class="btn-style px-4 py-2 mt-4">返回首页</button>
@@ -229,7 +229,7 @@
     </footer>
   </div>
 
-  <!-- 核心逻辑脚本（移除所有报错逻辑，保留核心功能） -->
+  <!-- 核心逻辑（彻底移除统计相关代码） -->
   <script>
     // 全局变量
     let currentUser = null;
@@ -239,15 +239,15 @@
     let battleInterval = null;
     let isMyTurn = false;
 
-    // 统一在 DOM 加载完成后执行初始化
+    // DOM加载完成后初始化
     document.addEventListener('DOMContentLoaded', () => {
-      initLoginRegister();    // 登录/注册逻辑
-      initPageSwitch();       // 页面切换逻辑
-      checkLoginState();      // 检查登录态
+      initLoginRegister();    // 登录/注册
+      initPageSwitch();       // 页面切换
+      checkLoginState();      // 登录态检查
       initMatchFunction();    // 匹配功能
     });
 
-    // 1. 登录/注册核心逻辑（修复自动进入主页）
+    // 1. 登录/注册逻辑（无统计相关代码）
     function initLoginRegister() {
       // 切换登录/注册表单
       document.getElementById('login-tab').addEventListener('click', () => {
@@ -277,7 +277,7 @@
         document.getElementById('login-modal').classList.add('hidden');
       });
 
-      // 注册功能（初始化必要数据）
+      // 注册功能
       document.getElementById('do-register').addEventListener('click', async () => {
         const username = document.getElementById('reg-username').value.trim();
         const password = document.getElementById('reg-password').value;
@@ -305,7 +305,7 @@
           await user.signUp();
           currentUser = user;
 
-          // 初始化用户对战数据（胜场0、败场0、胜率0%）
+          // 初始化对战数据
           const PlayerStats = AV.Object.extend('PlayerStats');
           const stats = new PlayerStats();
           stats.set('user', user);
@@ -314,7 +314,7 @@
           stats.set('winRate', 0);
           await stats.save();
 
-          // 初始化异常物数据（修复图片链接）
+          // 初始化异常物数据
           const UserAbnormal = AV.Object.extend('UserAbnormal');
           const abnormal = new UserAbnormal();
           abnormal.set('user', user);
@@ -329,7 +329,7 @@
 
           alert('注册成功！已自动登录');
           document.getElementById('login-modal').classList.add('hidden');
-          // 自动显示游戏容器，无需刷新
+          // 自动显示游戏容器（无需刷新）
           document.getElementById('game-container').classList.remove('hidden');
           document.getElementById('show-login').classList.add('hidden');
           document.getElementById('logout-btn').classList.remove('hidden');
@@ -353,7 +353,7 @@
           currentUser = await AV.User.logIn(username, password);
           alert('登录成功！');
           document.getElementById('login-modal').classList.add('hidden');
-          // 自动显示游戏容器，无需刷新
+          // 自动显示游戏容器（无需刷新）
           document.getElementById('game-container').classList.remove('hidden');
           document.getElementById('show-login').classList.add('hidden');
           document.getElementById('logout-btn').classList.remove('hidden');
@@ -363,12 +363,12 @@
         }
       });
 
-      // 退出登录功能（修复重新登录问题）
+      // 退出登录
       document.getElementById('logout-btn').addEventListener('click', async function() {
         try {
-          AV.User.logOut(); // 注销LeanCloud用户
-          localStorage.removeItem('currentUser'); // 清除本地存储
-          window.location.reload(); // 刷新页面重新初始化
+          AV.User.logOut();
+          localStorage.removeItem('currentUser');
+          window.location.reload();
         } catch (error) {
           alert('退出失败：' + error.message);
         }
@@ -386,27 +386,26 @@
       document.getElementById('nav-collection').addEventListener('click', () => {
         showPage('collection-page');
         updateNavActive('nav-collection');
-        loadCollectionData(); // 加载图鉴数据
+        loadCollectionData();
       });
 
       document.getElementById('nav-profile').addEventListener('click', () => {
         showPage('nav-profile-page');
         updateNavActive('nav-profile');
-        loadProfileData(); // 加载个人数据
+        loadProfileData();
       });
 
       // 对战后返回首页
       document.getElementById('return-home').addEventListener('click', () => {
         showPage('home-page');
         updateNavActive('nav-home');
-        // 清除对战相关定时器
         if (battleInterval) clearInterval(battleInterval);
         battleRoomId = null;
         currentBattleRoom = null;
         isMyTurn = false;
       });
 
-      // 显示指定页面（隐藏其他所有 section）
+      // 显示指定页面
       function showPage(pageId) {
         document.querySelectorAll('main section').forEach(section => {
           section.classList.add('hidden');
@@ -443,14 +442,14 @@
       }
     }
 
-    // 4. 更新页面用户信息
+    // 4. 更新用户信息
     async function updateUserInfo() {
       if (!currentUser) return;
       const playerNameEl = document.getElementById('player-name');
       if (playerNameEl) playerNameEl.textContent = currentUser.getUsername() || '幸存者';
     }
 
-    // 5. 匹配功能（修复两人同时进入对战）
+    // 5. 匹配功能（两人同时进入对战）
     function initMatchFunction() {
       document.getElementById('start-match').addEventListener('click', async () => {
         if (!currentUser) {
@@ -459,12 +458,12 @@
           return;
         }
 
-        // 显示匹配状态，隐藏匹配按钮
+        // 显示匹配状态
         document.getElementById('start-match').classList.add('hidden');
         document.getElementById('match-status').classList.remove('hidden');
 
         try {
-          // 1. 创建匹配记录，加入匹配池
+          // 创建匹配记录
           const MatchPool = AV.Object.extend('MatchPool');
           const matchRecord = new MatchPool();
           matchRecord.set('userId', currentUser.id);
@@ -472,28 +471,26 @@
           await matchRecord.save();
           const myMatchRecordId = matchRecord.id;
 
-          // 2. 定时查询：找到对手或被对手匹配
+          // 定时查询对手
           matchInterval = setInterval(async () => {
-            // 查是否有其他玩家匹配（自己作为玩家1）
+            // 查是否有其他玩家（自己作为玩家1）
             const opponentQuery = new AV.Query('MatchPool');
             opponentQuery.notEqualTo('userId', currentUser.id);
             const otherPlayers = await opponentQuery.find();
 
             if (otherPlayers.length > 0) {
-              // 找到对手：创建对战房间
               const opponent = otherPlayers[0];
               await createBattleRoom(opponent, matchRecord);
               return;
             }
 
-            // 查自己是否被其他玩家匹配（自己作为玩家2）
+            // 查自己是否被匹配（自己作为玩家2）
             const battleRoomQuery = new AV.Query('BattleRoom');
             battleRoomQuery.equalTo('player2Id', currentUser.id);
             battleRoomQuery.equalTo('status', 'battling');
             const battleRooms = await battleRoomQuery.find();
 
             if (battleRooms.length > 0) {
-              // 被匹配：进入对战页面
               currentBattleRoom = battleRooms[0];
               battleRoomId = currentBattleRoom.id;
               await matchRecord.destroy();
@@ -508,7 +505,6 @@
             }
           }, 2000);
         } catch (error) {
-          // 匹配出错：恢复状态
           alert('匹配失败：' + error.message);
           document.getElementById('start-match').classList.remove('hidden');
           document.getElementById('match-status').classList.add('hidden');
@@ -517,10 +513,9 @@
       });
     }
 
-    // 创建对战房间（供匹配功能调用）
+    // 创建对战房间
     async function createBattleRoom(opponent, myMatchRecord) {
       try {
-        // 创建对战房间
         const BattleRoom = AV.Object.extend('BattleRoom');
         const battleRoom = new BattleRoom();
         battleRoom.set('player1Id', currentUser.id);
@@ -530,17 +525,16 @@
         battleRoom.set('status', 'battling');
         battleRoom.set('player1Hp', 220);
         battleRoom.set('player2Hp', 220);
-        // 随机先手（1=玩家1，2=玩家2）
+        // 随机先手
         const firstAttack = Math.floor(Math.random() * 2) + 1;
         battleRoom.set('firstAttack', firstAttack);
         battleRoom.set('currentTurn', firstAttack);
         await battleRoom.save();
 
-        // 存储房间信息
         currentBattleRoom = battleRoom;
         battleRoomId = battleRoom.id;
 
-        // 清除双方匹配记录
+        // 清除匹配记录
         await myMatchRecord.destroy();
         await opponent.destroy();
         clearInterval(matchInterval);
@@ -559,12 +553,12 @@
       }
     }
 
-    // 6. 回合制对战逻辑（修复轮流攻击）
+    // 6. 回合制对战逻辑
     async function initBattleLogic(battleRoom) {
       if (!battleRoom) return;
       currentBattleRoom = battleRoom;
 
-      // 更新对战双方信息
+      // 更新对战信息
       const isPlayer1 = battleRoom.get('player1Id') === currentUser.id;
       const player1Name = battleRoom.get('player1Name') || '未知玩家';
       const player2Name = battleRoom.get('player2Name') || '未知玩家';
@@ -587,7 +581,7 @@
       const firstAttackName = currentTurn === 1 ? player1Name : player2Name;
       addBattleLog(`${firstAttackName}获得先手！`);
 
-      // 监听对战状态变化（同步对手操作）
+      // 监听对战状态
       if (battleInterval) clearInterval(battleInterval);
       battleInterval = setInterval(async () => {
         const query = new AV.Query('BattleRoom');
@@ -641,16 +635,16 @@
       // 技能按钮事件
       document.getElementById('skill1').addEventListener('click', () => {
         if (!isMyTurn) return;
-        useSkill(1); // 烈焰突袭
+        useSkill(1);
       });
 
       document.getElementById('skill2').addEventListener('click', () => {
         if (!isMyTurn) return;
-        useSkill(2); // 火焰吞噬
+        useSkill(2);
       });
     }
 
-    // 使用技能（伤害计算）
+    // 使用技能
     async function useSkill(skillType) {
       if (!currentUser || !currentBattleRoom) return;
 
@@ -659,7 +653,7 @@
       const enemyHpKey = isPlayer1 ? 'player2Hp' : 'player1Hp';
       const myName = currentUser.getUsername();
       const enemyName = isPlayer1 ? currentBattleRoom.get('player2Name') : currentBattleRoom.get('player1Name');
-      const attack = 92; // 红龙攻击
+      const attack = 92;
       let damage = 0;
 
       // 计算伤害
@@ -671,7 +665,6 @@
         const 吸血 = Math.round(damage * 0.3);
         addBattleLog(`${myName}使用了【火焰吞噬】！`);
         addBattleLog(`${myName}吸血${吸血}点HP！`);
-        // 更新自身HP
         currentBattleRoom.set(myHpKey, Math.min(currentBattleRoom.get(myHpKey) + 吸血, 220));
       }
 
@@ -686,7 +679,6 @@
         currentBattleRoom.set('winnerName', myName);
         currentBattleRoom.set('currentTurn', isPlayer1 ? 2 : 1);
       } else {
-        // 切换回合
         currentBattleRoom.set('currentTurn', isPlayer1 ? 2 : 1);
       }
 
@@ -740,7 +732,6 @@
       const logItem = document.createElement('p');
       logItem.textContent = `> ${new Date().toLocaleTimeString()}：${content}`;
       battleLogEl.appendChild(logItem);
-      // 滚动到最新日志
       battleLogEl.scrollTop = battleLogEl.scrollHeight;
     }
 
@@ -768,7 +759,7 @@
       }
     }
 
-    // 7. 加载异常物图鉴数据
+    // 加载异常物图鉴
     async function loadCollectionData() {
       if (!currentUser) return;
       const collectionListEl = document.getElementById('collection-list');
@@ -809,7 +800,7 @@
       }
     }
 
-    // 8. 加载个人信息数据
+    // 加载个人信息
     async function loadProfileData() {
       if (!currentUser) return;
       const profileDataEl = document.getElementById('profile-data');
