@@ -3,58 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>异常物对战：红龙篇</title>
   
-  <!-- 1. LeanCloud SDK 初始化（已填你的凭证） -->
+  <!-- 1. 优先加载依赖 SDK（LeanCloud、Tailwind、FontAwesome） -->
   <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.1/dist/av-min.js"></script>
-  // 页面加载时检查用户状态
-window.onload = function() {
-  const currentUser = AV.User.current();
-  const loginContainer = document.getElementById('loginContainer'); // 你的登录界面容器ID
-  const gameContainer = document.getElementById('gameContainer'); // 你的游戏界面容器ID
-
-  // 如果没登录，显示登录界面；已登录显示游戏界面
-  if (currentUser) {
-    loginContainer.style.display = 'none';
-    gameContainer.style.display = 'block';
-    // 初始化游戏数据（比如加载异常物、个人信息）
-    initGameData(currentUser);
-  } else {
-    loginContainer.style.display = 'block';
-    gameContainer.style.display = 'none';
-  }
-};
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 2. LeanCloud 初始化（放在 SDK 后，确保能调用 AV 对象） -->
   <script>
     const appId = "jbbgfC0tG7u5BNGPjAVrdBlJ-gzGzoHsz";
     const appKey = "zOYjnjqEOny7nUGpbAUy6UFQ";
     const serverURL = "https://jbbgfc0t.lc-cn-n1-shared.com";
-    AV.init({ appId, appKey, serverURL });
+    AV.init({ appId, appKey, serverURL }); // 初始化必须在使用 LeanCloud 前
   </script>
-
-  <title>异常物对战：红龙篇</title>
-  <!-- 2. 外部资源（仅保留Tailwind，简化依赖） -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
   
-  <!-- 3. Tailwind 配置（黑白极简风格，无多余配色） -->
+  <!-- 3. Tailwind 配置与自定义样式 -->
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: '#000000', // 纯黑
-            secondary: '#333333', // 深灰
-            light: '#f5f5f5', // 浅灰
-            accent: '#666666', // 中灰（强调色）
+            primary: '#000000',
+            secondary: '#333333',
+            light: '#f5f5f5',
+            accent: '#666666',
           },
           fontFamily: {
-            mono: ['"Courier New"', 'monospace'], // 等宽字体，适配极简风格
+            mono: ['"Courier New"', 'monospace'],
           },
         }
       }
     }
   </script>
-  
-  <!-- 4. 自定义工具类（极简边框/阴影） -->
   <style type="text/tailwindcss">
     @layer utilities {
       .border-simple { border: 1px solid #333; }
@@ -63,8 +44,6 @@ window.onload = function() {
       .text-balance { text-wrap: balance; }
     }
   </style>
-  
-  <!-- 5. 全局样式（黑白极简核心） -->
   <style>
     body {
       background: #ffffff;
@@ -80,9 +59,9 @@ window.onload = function() {
   </style>
 </head>
 <body class="min-h-screen">
-  <!-- 登录弹窗（极简风格重构） -->
+  <!-- 登录弹窗（ID：login-modal，与逻辑里的ID对齐） -->
   <div id="login-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-    <div class="bg-white border-simple p-6 w-full max-w-md">
+    <div class="bg-white border-simple p-6 w-full max-w-md relative">
       <h3 class="text-xl font-bold text-center mb-6 border-b border-simple pb-2">玩家登录</h3>
       
       <!-- 切换登录/注册标签 -->
@@ -121,9 +100,9 @@ window.onload = function() {
     </div>
   </div>
 
-  <!-- 游戏容器（默认隐藏，登录后显示） -->
+  <!-- 游戏容器（ID：game-container，与逻辑里的ID对齐） -->
   <div id="game-container" class="hidden container mx-auto px-4 py-8">
-    <!-- 顶部导航（极简风格） -->
+    <!-- 顶部导航 -->
     <header class="border-b border-simple mb-8 pb-4">
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold">异常物对战：红龙篇</h1>
@@ -153,13 +132,15 @@ window.onload = function() {
           <div id="match-status" class="mt-4 text-gray-600 hidden">匹配中... 请等待其他玩家</div>
         </div>
         
-        <!-- 红龙预览（极简文本+图片） -->
+        <!-- 红龙预览（修复 GitHub 图片链接：blob → raw） -->
         <div class="border-simple p-6">
           <h3 class="text-lg font-bold mb-4">当前可用异常物：红龙</h3>
           <div class="flex flex-col md:flex-row items-center">
-            <!-- 你的红龙图片（已替换为你的Gitee链接，删除空格） -->
-            <img src="https://gitee.com/kapibaladexiaowu/abnormal-object-battle/raw/master/%E5%BC%82%E5%B8%B8%E7%89%A9%E5%9B%BE%E7%89%87/%E6%B7%B7%E6%B2%8C%E7%BA%A2%E9%BE%99.jpg" 
-                 alt="红龙" class="w-40 h-40 object-cover border-simple mb-4 md:mb-0 md:mr-6">
+            <img 
+              src="https://raw.githubusercontent.com/kapibalaqirishijie/-/e5d289975b22651c56d0de0cbd6691d785b5bc17/%E6%B7%B7%E6%B2%8C%E7%BA%A2%E9%BE%99.jpg" 
+              alt="红龙" 
+              class="w-40 h-40 object-cover border-simple mb-4 md:mb-0 md:mr-6"
+            >
             <div class="text-left space-y-2">
               <p><span class="font-bold">属性：</span>火焰/龙</p>
               <p><span class="font-bold">攻击：</span>92</p>
@@ -171,23 +152,23 @@ window.onload = function() {
         </div>
       </section>
 
-      <!-- 异常物图鉴（后续补充） -->
+      <!-- 异常物图鉴 -->
       <section id="collection-page" class="hidden border-simple p-6">
         <h2 class="text-xl font-bold mb-6">异常物图鉴</h2>
         <div id="collection-list" class="space-y-6">
-          <!-- 图鉴内容后续补充 -->
+          <!-- 图鉴内容由 JS 动态加载 -->
         </div>
       </section>
 
-      <!-- 个人信息（后续补充） -->
+      <!-- 个人信息 -->
       <section id="nav-profile-page" class="hidden border-simple p-6">
         <h2 class="text-xl font-bold mb-6">个人对战数据</h2>
         <div id="profile-data" class="space-y-4">
-          <!-- 个人数据后续补充 -->
+          <!-- 个人数据由 JS 动态加载 -->
         </div>
       </section>
 
-      <!-- 对战页面（后续补充） -->
+      <!-- 对战页面 -->
       <section id="battle-page" class="hidden space-y-6">
         <h2 class="text-xl font-bold">对战中</h2>
         <div class="flex justify-between mb-6">
@@ -223,29 +204,25 @@ window.onload = function() {
       </section>
     </main>
 
-    <!-- 页脚（极简风格） -->
+    <!-- 页脚 -->
     <footer class="border-t border-simple mt-12 py-6 text-center text-gray-600">
       <p>异常物对战：红龙篇 | 黑白极简联机版</p>
     </footer>
   </div>
 
-  <!-- 核心逻辑脚本（第一部分：登录+用户数据+页面切换） -->
+  <!-- 核心逻辑脚本（放在 body 底部，确保 DOM 已加载） -->
   <script>
     // 全局变量
     let currentUser = null;
     let matchInterval = null; // 匹配定时器
     let battleRoomId = null; // 对战房间ID
 
-    // 页面加载初始化
+    // 统一在 DOM 加载完成后执行所有初始化（避免 DOM 未加载就操作）
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. 登录/注册逻辑
-      initLoginRegister();
-      // 2. 页面切换逻辑
-      initPageSwitch();
-      // 3. 检查登录态
-      checkLoginState();
-      // 4. 匹配功能初始化
-      initMatchFunction();
+      initLoginRegister();    // 1. 登录/注册逻辑
+      initPageSwitch();       // 2. 页面切换逻辑
+      checkLoginState();      // 3. 检查登录态（控制显示登录弹窗/游戏容器）
+      initMatchFunction();    // 4. 匹配功能初始化
     });
 
     // 1. 登录/注册核心逻辑
@@ -273,6 +250,7 @@ window.onload = function() {
       document.getElementById('show-login').addEventListener('click', () => {
         document.getElementById('login-modal').classList.remove('hidden');
       });
+
       document.getElementById('close-login').addEventListener('click', () => {
         document.getElementById('login-modal').classList.add('hidden');
       });
@@ -314,7 +292,7 @@ window.onload = function() {
           stats.set('winRate', 0);
           await stats.save();
 
-          // 初始化异常物数据（默认拥有红龙）
+          // 初始化异常物数据（修复图片链接：blob → raw）
           const UserAbnormal = AV.Object.extend('UserAbnormal');
           const abnormal = new UserAbnormal();
           abnormal.set('user', user);
@@ -324,7 +302,7 @@ window.onload = function() {
           abnormal.set('defense', 78);
           abnormal.set('speed', 95);
           abnormal.set('skills', ['烈焰突袭', '火焰吞噬']);
-          abnormal.set('imageUrl', 'https://github.com/kapibalaqirishijie/-/blob/e5d289975b22651c56d0de0cbd6691d785b5bc17/%E6%B7%B7%E6%B2%8C%E7%BA%A2%E9%BE%99.jpg');
+          abnormal.set('imageUrl', 'https://raw.githubusercontent.com/kapibalaqirishijie/-/e5d289975b22651c56d0de0cbd6691d785b5bc17/%E6%B7%B7%E6%B2%8C%E7%BA%A2%E9%BE%99.jpg');
           await abnormal.save();
 
           alert('注册成功！已自动登录，可直接匹配对战');
@@ -355,15 +333,12 @@ window.onload = function() {
         }
       });
 
-      // 修复后的退出登录代码（直接替换）
-      document.getElementById('logoutBtn').addEventListener('click', async function() {
+      // 退出登录功能（确保清除云端缓存+刷新页面）
+      document.getElementById('logout-btn').addEventListener('click', async function() {
         try {
-          // 1. 注销 LeanCloud 的用户（关键！清除云端缓存）
-          AV.User.logOut();
-          // 2. 清除本地存储的用户信息
-          localStorage.removeItem('currentUser');
-          // 3. 刷新页面，重新显示登录界面
-          window.location.reload();
+          AV.User.logOut(); // 1. 注销 LeanCloud 云端用户
+          localStorage.removeItem('currentUser'); // 2. 清除本地存储
+          window.location.reload(); // 3. 刷新页面，重新初始化
         } catch (error) {
           alert('退出失败：' + error.message);
         }
@@ -377,57 +352,61 @@ window.onload = function() {
         showPage('home-page');
         updateNavActive('nav-home');
       });
+
       document.getElementById('nav-collection').addEventListener('click', () => {
         showPage('collection-page');
         updateNavActive('nav-collection');
         loadCollectionData(); // 加载图鉴数据
       });
+
       document.getElementById('nav-profile').addEventListener('click', () => {
         showPage('nav-profile-page');
         updateNavActive('nav-profile');
         loadProfileData(); // 加载个人数据
       });
 
-      // 显示指定页面
+      // 显示指定页面（隐藏其他所有 section）
       function showPage(pageId) {
         document.querySelectorAll('main section').forEach(section => {
           section.classList.add('hidden');
         });
-        document.getElementById(pageId).classList.remove('hidden');
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) targetPage.classList.remove('hidden');
       }
 
-      // 更新导航高亮
+      // 更新导航高亮（移除其他高亮，给当前导航加高亮）
       function updateNavActive(navId) {
         document.querySelectorAll('nav button').forEach(btn => {
           btn.classList.remove('border-b-2', 'border-primary');
         });
-        document.getElementById(navId).classList.add('border-b-2', 'border-primary');
+        const targetNav = document.getElementById(navId);
+        if (targetNav) targetNav.classList.add('border-b-2', 'border-primary');
       }
     }
 
-    // 3. 检查登录态
+    // 3. 检查登录态（控制显示：登录弹窗/游戏容器）
     async function checkLoginState() {
-      currentUser = AV.User.current();
+      currentUser = AV.User.current(); // 从 LeanCloud 获取当前登录用户
       if (currentUser) {
-        updateUserInfo();
+        // 已登录：显示游戏容器，隐藏登录按钮
+        document.getElementById('game-container').classList.remove('hidden');
+        document.getElementById('show-login').classList.add('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        updateUserInfo(); // 更新用户名显示
       } else {
-        // 未登录，显示登录按钮
+        // 未登录：显示登录按钮，隐藏游戏容器，自动弹出登录弹窗
+        document.getElementById('game-container').classList.add('hidden');
         document.getElementById('show-login').classList.remove('hidden');
         document.getElementById('logout-btn').classList.add('hidden');
+        document.getElementById('login-modal').classList.remove('hidden');
       }
     }
 
-    // 4. 更新页面用户信息
+    // 4. 更新页面用户信息（用户名显示）
     async function updateUserInfo() {
       if (!currentUser) return;
-
-      // 更新用户名
-      document.getElementById('player-name').textContent = currentUser.getUsername();
-      // 切换按钮显示
-      document.getElementById('show-login').classList.add('hidden');
-      document.getElementById('logout-btn').classList.remove('hidden');
-      // 显示游戏容器
-      document.getElementById('game-container').classList.remove('hidden');
+      const playerNameEl = document.getElementById('player-name');
+      if (playerNameEl) playerNameEl.textContent = currentUser.getUsername() || '幸存者';
     }
 
     // 5. 匹配功能初始化（基础匹配池逻辑）
@@ -439,153 +418,195 @@ window.onload = function() {
           return;
         }
 
-        // 显示匹配状态
+        // 显示匹配状态，隐藏匹配按钮
         document.getElementById('start-match').classList.add('hidden');
         document.getElementById('match-status').classList.remove('hidden');
 
-        // 1. 创建匹配记录，加入匹配池
-        const MatchPool = AV.Object.extend('MatchPool');
-        const matchRecord = new MatchPool();
-        matchRecord.set('userId', currentUser.id);
-        matchRecord.set('username', currentUser.getUsername());
-        await matchRecord.save();
+        try {
+          // 1. 创建匹配记录，加入匹配池
+          const MatchPool = AV.Object.extend('MatchPool');
+          const matchRecord = new MatchPool();
+          matchRecord.set('userId', currentUser.id);
+          matchRecord.set('username', currentUser.getUsername());
+          await matchRecord.save();
 
-        // 2. 定时查询匹配池，寻找其他玩家（每2秒查一次）
-        matchInterval = setInterval(async () => {
-          const query = new AV.Query('MatchPool');
-          query.notEqualTo('userId', currentUser.id); // 排除自己
-          const otherPlayers = await query.find();
+          // 2. 定时查询匹配池（每2秒查一次，找其他玩家）
+          matchInterval = setInterval(async () => {
+            const query = new AV.Query('MatchPool');
+            query.notEqualTo('userId', currentUser.id); // 排除自己
+            const otherPlayers = await query.find();
 
-          if (otherPlayers.length > 0) {
-            // 找到对手，创建对战房间
-            const opponent = otherPlayers[0];
-            const BattleRoom = AV.Object.extend('BattleRoom');
-            const battleRoom = new BattleRoom();
-            battleRoom.set('player1Id', currentUser.id);
-            battleRoom.set('player1Name', currentUser.getUsername());
-            battleRoom.set('player2Id', opponent.get('userId'));
-            battleRoom.set('player2Name', opponent.get('username'));
-            battleRoom.set('status', 'battling'); // 对战中状态
-            battleRoom.set('player1Hp', 220);
-            battleRoom.set('player2Hp', 220);
-            await battleRoom.save();
+            if (otherPlayers.length > 0) {
+              // 找到对手：创建对战房间
+              const opponent = otherPlayers[0];
+              const BattleRoom = AV.Object.extend('BattleRoom');
+              const battleRoom = new BattleRoom();
+              battleRoom.set('player1Id', currentUser.id);
+              battleRoom.set('player1Name', currentUser.getUsername());
+              battleRoom.set('player2Id', opponent.get('userId'));
+              battleRoom.set('player2Name', opponent.get('username'));
+              battleRoom.set('status', 'battling');
+              battleRoom.set('player1Hp', 220);
+              battleRoom.set('player2Hp', 220);
+              await battleRoom.save();
 
-            // 存储对战房间ID
-            battleRoomId = battleRoom.id;
+              // 存储对战房间ID，清除匹配池记录
+              battleRoomId = battleRoom.id;
+              await matchRecord.destroy();
+              await opponent.destroy();
+              clearInterval(matchInterval);
 
-            // 清除匹配池记录
-            await matchRecord.destroy();
-            await opponent.destroy();
-            clearInterval(matchInterval);
-
-            // 进入对战页面
-            document.getElementById('start-match').classList.remove('hidden');
-            document.getElementById('match-status').classList.add('hidden');
-            showPage('battle-page');
-            updateNavActive(''); // 清除导航高亮
-            initBattleLogic(battleRoom); // 初始化对战逻辑
-          }
-        }, 2000);
+              // 进入对战页面
+              document.getElementById('start-match').classList.remove('hidden');
+              document.getElementById('match-status').classList.add('hidden');
+              showPage('battle-page');
+              updateNavActive(''); // 清除导航高亮
+              initBattleLogic(battleRoom); // 初始化对战逻辑
+            }
+          }, 2000);
+        } catch (error) {
+          // 匹配出错：恢复按钮状态，清除定时器
+          alert('匹配失败：' + error.message);
+          document.getElementById('start-match').classList.remove('hidden');
+          document.getElementById('match-status').classList.add('hidden');
+          if (matchInterval) clearInterval(matchInterval);
+        }
       });
     }
 
     // 6. 加载异常物图鉴数据
     async function loadCollectionData() {
       if (!currentUser) return;
+      const collectionListEl = document.getElementById('collection-list');
+      if (!collectionListEl) return;
 
-      const query = new AV.Query('UserAbnormal');
-      query.equalTo('user', currentUser);
-      const abnormals = await query.find();
+      try {
+        const query = new AV.Query('UserAbnormal');
+        query.equalTo('user', currentUser);
+        const abnormals = await query.find();
 
-      const collectionList = document.getElementById('collection-list');
-      collectionList.innerHTML = ''; // 清空列表
+        collectionListEl.innerHTML = ''; // 清空列表
+        if (abnormals.length === 0) {
+          collectionListEl.innerHTML = '<p class="text-center">暂无异常物数据</p>';
+          return;
+        }
 
-      // 遍历异常物（目前只有红龙）
-      abnormals.forEach(abnormal => {
-        const item = document.createElement('div');
-        item.className = 'border-simple p-4 flex flex-col md:flex-row items-center';
-        item.innerHTML = `
-          <img src="${abnormal.get('imageUrl')}" alt="${abnormal.get('name')}" class="w-32 h-32 object-cover border-simple mb-4 md:mb-0 md:mr-6">
-          <div class="space-y-2">
-            <h4 class="text-lg font-bold">${abnormal.get('name')}</h4>
-            <p><span class="font-bold">攻击：</span>${abnormal.get('attack')}</p>
-            <p><span class="font-bold">防御：</span>${abnormal.get('defense')}</p>
-            <p><span class="font-bold">速度：</span>${abnormal.get('speed')}</p>
-            <p><span class="font-bold">技能：</span>${abnormal.get('skills').join('、')}</p>
-          </div>
-        `;
-        collectionList.appendChild(item);
-      });
+        // 遍历异常物（目前只有红龙）
+        abnormals.forEach(abnormal => {
+          const item = document.createElement('div');
+          item.className = 'border-simple p-4 flex flex-col md:flex-row items-center';
+          item.innerHTML = `
+            <img 
+              src="${abnormal.get('imageUrl')}" 
+              alt="${abnormal.get('name')}" 
+              class="w-32 h-32 object-cover border-simple mb-4 md:mb-0 md:mr-6"
+            >
+            <div class="space-y-2">
+              <h4 class="text-lg font-bold">${abnormal.get('name')}</h4>
+              <p><span class="font-bold">攻击：</span>${abnormal.get('attack')}</p>
+              <p><span class="font-bold">防御：</span>${abnormal.get('defense')}</p>
+              <p><span class="font-bold">速度：</span>${abnormal.get('speed')}</p>
+              <p><span class="font-bold">技能：</span>${abnormal.get('skills').join('、')}</p>
+            </div>
+          `;
+          collectionListEl.appendChild(item);
+        });
+      } catch (error) {
+        collectionListEl.innerHTML = `<p class="text-center text-red-600">加载失败：${error.message}</p>`;
+      }
     }
 
     // 7. 加载个人信息数据
     async function loadProfileData() {
       if (!currentUser) return;
+      const profileDataEl = document.getElementById('profile-data');
+      if (!profileDataEl) return;
 
-      const query = new AV.Query('PlayerStats');
-      query.equalTo('user', currentUser);
-      const stats = await query.first();
+      try {
+        const query = new AV.Query('PlayerStats');
+        query.equalTo('user', currentUser);
+        const stats = await query.first();
 
-      const profileData = document.getElementById('profile-data');
-      if (stats) {
-        const winCount = stats.get('winCount');
-        const loseCount = stats.get('loseCount');
-        const totalCount = winCount + loseCount;
-        const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
+        if (stats) {
+          const winCount = stats.get('winCount') || 0;
+          const loseCount = stats.get('loseCount') || 0;
+          const totalCount = winCount + loseCount;
+          const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
 
-        profileData.innerHTML = `
-          <div class="border-simple p-4">
-            <p class="font-bold">用户名：${currentUser.getUsername()}</p>
-          </div>
-          <div class="border-simple p-4">
-            <p>胜利场次：${winCount} 场</p>
-          </div>
-          <div class="border-simple p-4">
-            <p>失败场次：${loseCount} 场</p>
-          </div>
-          <div class="border-simple p-4">
-            <p>对战总场次：${totalCount} 场</p>
-          </div>
-          <div class="border-simple p-4">
-            <p>胜率：${winRate}%</p>
-          </div>
-        `;
-      } else {
-        profileData.innerHTML = '<p>暂无对战数据</p>';
+          profileDataEl.innerHTML = `
+            <div class="border-simple p-4">
+              <p class="font-bold">用户名：${currentUser.getUsername() || '未知'}</p>
+            </div>
+            <div class="border-simple p-4">
+              <p>胜利场次：${winCount} 场</p>
+            </div>
+            <div class="border-simple p-4">
+              <p>失败场次：${loseCount} 场</p>
+            </div>
+            <div class="border-simple p-4">
+              <p>对战总场次：${totalCount} 场</p>
+            </div>
+            <div class="border-simple p-4">
+              <p>胜率：${winRate}%</p>
+            </div>
+          `;
+        } else {
+          profileDataEl.innerHTML = '<p class="text-center">暂无对战数据</p>';
+        }
+      } catch (error) {
+        profileDataEl.innerHTML = `<p class="text-center text-red-600">加载失败：${error.message}</p>`;
       }
     }
 
-    // 8. 对战逻辑（基础框架，后续补充完整）
+    // 8. 对战逻辑（基础框架）
     function initBattleLogic(battleRoom) {
+      if (!battleRoom) return;
       // 更新对手名称
-      document.getElementById('player2-name').textContent = battleRoom.get('player2Name');
-      // 初始化HP显示
-      document.getElementById('player1-hp').textContent = `HP: ${battleRoom.get('player1Hp')}/${battleRoom.get('player1Hp')}`;
-      document.getElementById('player2-hp').textContent = `HP: ${battleRoom.get('player2Hp')}/${battleRoom.get('player2Hp')}`;
+      const player2NameEl = document.getElementById('player2-name');
+      const player1HpEl = document.getElementById('player1-hp');
+      const player2HpEl = document.getElementById('player2-hp');
+      if (player2NameEl) player2NameEl.textContent = battleRoom.get('player2Name') || '未知对手';
+      if (player1HpEl) player1HpEl.textContent = `HP: ${battleRoom.get('player1Hp')}/${battleRoom.get('player1Hp')}`;
+      if (player2HpEl) player2HpEl.textContent = `HP: ${battleRoom.get('player2Hp')}/${battleRoom.get('player2Hp')}`;
 
-      // 技能按钮点击事件（后续补充完整逻辑）
+      // 技能按钮点击事件（基础日志功能，可后续扩展伤害计算）
       document.getElementById('skill1').addEventListener('click', () => {
         addBattleLog(`你使用了【烈焰突袭】`);
-        // 后续补充伤害计算、HP同步、对手反击逻辑
       });
 
       document.getElementById('skill2').addEventListener('click', () => {
         addBattleLog(`你使用了【火焰吞噬】`);
-        // 后续补充伤害计算、吸血、HP同步逻辑
       });
     }
 
     // 9. 添加战斗日志
     function addBattleLog(content) {
-      const battleLog = document.getElementById('battle-log');
+      const battleLogEl = document.getElementById('battle-log');
+      if (!battleLogEl) return;
       const logItem = document.createElement('p');
       logItem.textContent = `> ${new Date().toLocaleTimeString()}：${content}`;
-      battleLog.appendChild(logItem);
+      battleLogEl.appendChild(logItem);
       // 滚动到最新日志
-      battleLog.scrollTop = battleLog.scrollHeight;
+      battleLogEl.scrollTop = battleLogEl.scrollHeight;
+    }
+
+    // 辅助函数：显示指定页面（供对战逻辑调用）
+    function showPage(pageId) {
+      document.querySelectorAll('main section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      const targetPage = document.getElementById(pageId);
+      if (targetPage) targetPage.classList.remove('hidden');
+    }
+
+    // 辅助函数：更新导航高亮（供对战逻辑调用）
+    function updateNavActive(navId) {
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.classList.remove('border-b-2', 'border-primary');
+      });
+      const targetNav = document.getElementById(navId);
+      if (targetNav) targetNav.classList.add('border-b-2', 'border-primary');
     }
   </script>
 </body>
-
 </html>
-
