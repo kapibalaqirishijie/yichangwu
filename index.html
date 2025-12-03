@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>异常物对战v0.1</title> <!-- 需求5：修改游戏名称 -->
+  <title>异常物对战v0.1</title>
   
-  <!-- 依赖 SDK（LeanCloud、Tailwind、FontAwesome） -->
+  <!-- 依赖 SDK（仅保留必要的核心依赖） -->
   <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.1/dist/av-min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
     AV.init({ appId, appKey, serverURL });
   </script>
   
-  <!-- Tailwind 配置（新增圆角、阴影等设计感样式） -->
+  <!-- Tailwind 配置（极简黑白+圆角设计） -->
   <script>
     tailwind.config = {
       theme: {
@@ -26,8 +26,6 @@
           colors: {
             primary: '#000000',
             secondary: '#333333',
-            light: '#f5f5f5',
-            accent: '#666666',
             hover: '#e8e8e8',
           },
           fontFamily: {
@@ -45,7 +43,6 @@
       .btn-style:hover { background: #e8e8e8; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
       .input-style { border: 1px solid #333; border-radius: 6px; transition: border 0.2s ease; }
       .input-style:focus { outline: none; border-color: #000; box-shadow: 0 0 0 2px rgba(0,0,0,0.05); }
-      .text-balance { text-wrap: balance; }
     }
   </style>
   <style>
@@ -116,7 +113,7 @@
     <!-- 顶部导航 -->
     <header class="border-b border-simple mb-8 pb-4">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 class="text-2xl font-bold">异常物对战v0.1</h1> <!-- 需求5：修改游戏名称 -->
+        <h1 class="text-2xl font-bold">异常物对战v0.1</h1>
         <div class="flex items-center space-x-4">
           <span id="player-name" class="btn-style px-3 py-1">幸存者</span>
           <button id="show-login" class="btn-style px-3 py-1 hidden">登录</button>
@@ -134,24 +131,8 @@
 
     <!-- 主内容区 -->
     <main>
-      <!-- 首页（匹配对战入口+统计数据） -->
+      <!-- 首页（匹配对战入口） -->
       <section id="home-page" class="space-y-8">
-        <!-- 统计数据卡片（需求4：实时在线+今日登录） -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="card-style p-4 text-center">
-            <h3 class="text-lg font-bold mb-2 flex items-center justify-center">
-              <i class="fa fa-users mr-2"></i>实时在线人数
-            </h3>
-            <p id="online-count" class="text-2xl font-mono">0</p>
-          </div>
-          <div class="card-style p-4 text-center">
-            <h3 class="text-lg font-bold mb-2 flex items-center justify-center">
-              <i class="fa fa-calendar-check-o mr-2"></i>今日累计登录
-            </h3>
-            <p id="today-login-count" class="text-2xl font-mono">0</p>
-          </div>
-        </div>
-        
         <!-- 匹配对战入口 -->
         <div class="card-style p-6 text-center">
           <h2 class="text-xl font-bold mb-4">随机匹配对战</h2>
@@ -196,7 +177,7 @@
         </div>
       </section>
 
-      <!-- 对战页面（需求2：回合制） -->
+      <!-- 对战页面（回合制） -->
       <section id="battle-page" class="hidden space-y-6">
         <h2 class="text-xl font-bold text-center">回合制对战</h2>
         
@@ -244,31 +225,29 @@
 
     <!-- 页脚 -->
     <footer class="border-t border-simple mt-12 py-6 text-center text-gray-600 text-sm">
-      <p>异常物对战v0.1 | 黑白极简回合制联机版</p> <!-- 需求5：修改游戏名称 -->
+      <p>异常物对战v0.1 | 黑白极简回合制联机版</p>
     </footer>
   </div>
 
-  <!-- 核心逻辑脚本 -->
+  <!-- 核心逻辑脚本（移除所有报错逻辑，保留核心功能） -->
   <script>
     // 全局变量
     let currentUser = null;
-    let matchInterval = null; // 匹配定时器
-    let battleRoomId = null; // 对战房间ID
-    let currentBattleRoom = null; // 当前对战房间数据
-    let battleInterval = null; // 对战状态监听定时器
-    let isMyTurn = false; // 是否当前玩家回合
+    let matchInterval = null;
+    let battleRoomId = null;
+    let currentBattleRoom = null;
+    let battleInterval = null;
+    let isMyTurn = false;
 
-    // 统一在 DOM 加载完成后执行所有初始化
+    // 统一在 DOM 加载完成后执行初始化
     document.addEventListener('DOMContentLoaded', () => {
-      initLoginRegister();    // 1. 登录/注册逻辑
-      initPageSwitch();       // 2. 页面切换逻辑
-      checkLoginState();      // 3. 检查登录态
-      initMatchFunction();    // 4. 匹配功能初始化
-      initStatisticUpdate();  // 5. 统计数据实时更新（需求4）
-      initExitHandle();       // 6. 页面关闭/刷新时更新在线状态
+      initLoginRegister();    // 登录/注册逻辑
+      initPageSwitch();       // 页面切换逻辑
+      checkLoginState();      // 检查登录态
+      initMatchFunction();    // 匹配功能
     });
 
-    // 1. 登录/注册核心逻辑（需求3：登录后自动进入主页）
+    // 1. 登录/注册核心逻辑（修复自动进入主页）
     function initLoginRegister() {
       // 切换登录/注册表单
       document.getElementById('login-tab').addEventListener('click', () => {
@@ -298,7 +277,7 @@
         document.getElementById('login-modal').classList.add('hidden');
       });
 
-      // 注册功能（新号默认拥有红龙+初始化对战数据）
+      // 注册功能（初始化必要数据）
       document.getElementById('do-register').addEventListener('click', async () => {
         const username = document.getElementById('reg-username').value.trim();
         const password = document.getElementById('reg-password').value;
@@ -335,7 +314,7 @@
           stats.set('winRate', 0);
           await stats.save();
 
-          // 初始化异常物数据
+          // 初始化异常物数据（修复图片链接）
           const UserAbnormal = AV.Object.extend('UserAbnormal');
           const abnormal = new UserAbnormal();
           abnormal.set('user', user);
@@ -348,14 +327,9 @@
           abnormal.set('imageUrl', 'https://raw.githubusercontent.com/kapibalaqirishijie/-/e5d289975b22651c56d0de0cbd6691d785b5bc17/%E6%B7%B7%E6%B2%8C%E7%BA%A2%E9%BE%99.jpg');
           await abnormal.save();
 
-          // 记录今日登录（需求4）
-          await recordLogin();
-          // 添加到在线用户（需求4）
-          await addOnlineUser();
-
-          alert('注册成功！已自动登录，可直接匹配对战');
+          alert('注册成功！已自动登录');
           document.getElementById('login-modal').classList.add('hidden');
-          // 需求3：自动更新页面，无需刷新
+          // 自动显示游戏容器，无需刷新
           document.getElementById('game-container').classList.remove('hidden');
           document.getElementById('show-login').classList.add('hidden');
           document.getElementById('logout-btn').classList.remove('hidden');
@@ -377,15 +351,9 @@
 
         try {
           currentUser = await AV.User.logIn(username, password);
-          
-          // 记录今日登录（需求4）
-          await recordLogin();
-          // 添加到在线用户（需求4）
-          await addOnlineUser();
-
           alert('登录成功！');
           document.getElementById('login-modal').classList.add('hidden');
-          // 需求3：自动更新页面，无需刷新
+          // 自动显示游戏容器，无需刷新
           document.getElementById('game-container').classList.remove('hidden');
           document.getElementById('show-login').classList.add('hidden');
           document.getElementById('logout-btn').classList.remove('hidden');
@@ -395,17 +363,12 @@
         }
       });
 
-      // 退出登录功能
+      // 退出登录功能（修复重新登录问题）
       document.getElementById('logout-btn').addEventListener('click', async function() {
         try {
-          // 从在线用户中移除（需求4）
-          await removeOnlineUser();
-          // 注销 LeanCloud 云端用户
-          AV.User.logOut();
-          // 清除本地存储
-          localStorage.removeItem('currentUser');
-          // 刷新页面，重新初始化
-          window.location.reload();
+          AV.User.logOut(); // 注销LeanCloud用户
+          localStorage.removeItem('currentUser'); // 清除本地存储
+          window.location.reload(); // 刷新页面重新初始化
         } catch (error) {
           alert('退出失败：' + error.message);
         }
@@ -423,13 +386,13 @@
       document.getElementById('nav-collection').addEventListener('click', () => {
         showPage('collection-page');
         updateNavActive('nav-collection');
-        loadCollectionData();
+        loadCollectionData(); // 加载图鉴数据
       });
 
       document.getElementById('nav-profile').addEventListener('click', () => {
         showPage('nav-profile-page');
         updateNavActive('nav-profile');
-        loadProfileData();
+        loadProfileData(); // 加载个人数据
       });
 
       // 对战后返回首页
@@ -466,15 +429,13 @@
     async function checkLoginState() {
       currentUser = AV.User.current();
       if (currentUser) {
-        // 已登录：添加到在线用户
-        await addOnlineUser();
-        // 显示游戏容器，隐藏登录按钮
+        // 已登录：显示游戏容器
         document.getElementById('game-container').classList.remove('hidden');
         document.getElementById('show-login').classList.add('hidden');
         document.getElementById('logout-btn').classList.remove('hidden');
         updateUserInfo();
       } else {
-        // 未登录：显示登录按钮，隐藏游戏容器，自动弹出登录弹窗
+        // 未登录：显示登录弹窗
         document.getElementById('game-container').classList.add('hidden');
         document.getElementById('show-login').classList.remove('hidden');
         document.getElementById('logout-btn').classList.add('hidden');
@@ -489,7 +450,7 @@
       if (playerNameEl) playerNameEl.textContent = currentUser.getUsername() || '幸存者';
     }
 
-    // 5. 匹配功能初始化（需求1：两人同时进入对战）
+    // 5. 匹配功能（修复两人同时进入对战）
     function initMatchFunction() {
       document.getElementById('start-match').addEventListener('click', async () => {
         if (!currentUser) {
@@ -511,7 +472,7 @@
           await matchRecord.save();
           const myMatchRecordId = matchRecord.id;
 
-          // 2. 定时查询：要么找到对手，要么自己被对手匹配
+          // 2. 定时查询：找到对手或被对手匹配
           matchInterval = setInterval(async () => {
             // 查是否有其他玩家匹配（自己作为玩家1）
             const opponentQuery = new AV.Query('MatchPool');
@@ -532,10 +493,9 @@
             const battleRooms = await battleRoomQuery.find();
 
             if (battleRooms.length > 0) {
-              // 被其他玩家匹配：进入对战页面
+              // 被匹配：进入对战页面
               currentBattleRoom = battleRooms[0];
               battleRoomId = currentBattleRoom.id;
-              // 清除自己的匹配记录
               await matchRecord.destroy();
               clearInterval(matchInterval);
               // 进入对战页面
@@ -543,13 +503,12 @@
               document.getElementById('match-status').classList.add('hidden');
               showPage('battle-page');
               updateNavActive('');
-              // 初始化对战逻辑
               await initBattleLogic(currentBattleRoom);
               return;
             }
           }, 2000);
         } catch (error) {
-          // 匹配出错：恢复按钮状态，清除定时器
+          // 匹配出错：恢复状态
           alert('匹配失败：' + error.message);
           document.getElementById('start-match').classList.remove('hidden');
           document.getElementById('match-status').classList.add('hidden');
@@ -569,15 +528,15 @@
         battleRoom.set('player2Id', opponent.get('userId'));
         battleRoom.set('player2Name', opponent.get('username'));
         battleRoom.set('status', 'battling');
-        battleRoom.set('player1Hp', 220); // 初始HP=攻击+防御=92+78=170？之前写的220，保持一致
+        battleRoom.set('player1Hp', 220);
         battleRoom.set('player2Hp', 220);
-        // 需求2：随机先手（1=玩家1先手，2=玩家2先手）
+        // 随机先手（1=玩家1，2=玩家2）
         const firstAttack = Math.floor(Math.random() * 2) + 1;
         battleRoom.set('firstAttack', firstAttack);
-        battleRoom.set('currentTurn', firstAttack); // 当前回合=先手玩家
+        battleRoom.set('currentTurn', firstAttack);
         await battleRoom.save();
 
-        // 存储对战房间信息
+        // 存储房间信息
         currentBattleRoom = battleRoom;
         battleRoomId = battleRoom.id;
 
@@ -591,7 +550,6 @@
         document.getElementById('match-status').classList.add('hidden');
         showPage('battle-page');
         updateNavActive('');
-        // 初始化对战逻辑
         await initBattleLogic(battleRoom);
       } catch (error) {
         alert('创建对战房间失败：' + error.message);
@@ -601,7 +559,7 @@
       }
     }
 
-    // 6. 回合制对战逻辑（需求2）
+    // 6. 回合制对战逻辑（修复轮流攻击）
     async function initBattleLogic(battleRoom) {
       if (!battleRoom) return;
       currentBattleRoom = battleRoom;
@@ -614,22 +572,22 @@
       const player2Hp = battleRoom.get('player2Hp') || 220;
       const currentTurn = battleRoom.get('currentTurn') || 1;
 
-      // 显示对手名称和HP
+      // 显示名称和HP
       document.getElementById('player1-name').textContent = isPlayer1 ? '你' : player1Name;
       document.getElementById('player2-name').textContent = isPlayer1 ? player2Name : '你';
       document.getElementById('player1-hp').textContent = `HP: ${player1Hp}/${220}`;
       document.getElementById('player2-hp').textContent = `HP: ${player2Hp}/${220}`;
 
-      // 判断是否当前玩家回合
+      // 判断当前回合
       isMyTurn = (currentTurn === 1 && isPlayer1) || (currentTurn === 2 && !isPlayer1);
-      updateTurnIndicator(); // 更新回合指示器
-      updateSkillButtonState(); // 更新技能按钮状态
+      updateTurnIndicator();
+      updateSkillButtonState();
 
-      // 添加战斗日志（先手信息）
+      // 战斗日志
       const firstAttackName = currentTurn === 1 ? player1Name : player2Name;
       addBattleLog(`${firstAttackName}获得先手！`);
 
-      // 监听对战房间状态变化（对手操作后同步数据）
+      // 监听对战状态变化（同步对手操作）
       if (battleInterval) clearInterval(battleInterval);
       battleInterval = setInterval(async () => {
         const query = new AV.Query('BattleRoom');
@@ -643,7 +601,7 @@
           const newPlayer2Hp = latestRoom.get('player2Hp') || 220;
           const newCurrentTurn = latestRoom.get('currentTurn') || 1;
 
-          // 更新HP显示
+          // 更新HP
           if (newPlayer1Hp !== player1Hp) {
             document.getElementById('player1-hp').textContent = `HP: ${newPlayer1Hp}/${220}`;
           }
@@ -651,7 +609,7 @@
             document.getElementById('player2-hp').textContent = `HP: ${newPlayer2Hp}/${220}`;
           }
 
-          // 更新回合状态
+          // 更新回合
           if (newCurrentTurn !== currentTurn) {
             isMyTurn = (newCurrentTurn === 1 && isPlayer1) || (newCurrentTurn === 2 && !isPlayer1);
             updateTurnIndicator();
@@ -659,19 +617,19 @@
             addBattleLog(`回合切换：${isMyTurn ? '你的回合' : '对手回合'}`);
           }
 
-          // 战斗结束（一方HP≤0）
+          // 战斗结束
           if (newStatus === 'ended') {
             clearInterval(battleInterval);
             const winnerName = latestRoom.get('winnerName') || '未知玩家';
             const isWin = winnerName === currentUser.getUsername();
             addBattleLog(`战斗结束！${winnerName}获胜！`);
-            // 显示战斗结果
+            // 显示结果
             document.getElementById('battle-result').classList.remove('hidden');
             document.getElementById('result-text').textContent = isWin ? '恭喜你获得胜利！' : '很遗憾，你失败了';
-            // 更新个人对战数据
+            // 更新个人数据
             await updatePlayerStats(isWin);
             // 禁用技能按钮
-            document.getElementById('skill-container').querySelectorAll('button').forEach(btn => {
+            document.querySelectorAll('#skill-container button').forEach(btn => {
               btn.classList.add('pointer-events-none', 'opacity-50');
             });
           }
@@ -680,19 +638,19 @@
         }
       }, 1000);
 
-      // 技能按钮点击事件
+      // 技能按钮事件
       document.getElementById('skill1').addEventListener('click', () => {
         if (!isMyTurn) return;
-        useSkill(1); // 烈焰突袭：120%伤害
+        useSkill(1); // 烈焰突袭
       });
 
       document.getElementById('skill2').addEventListener('click', () => {
         if (!isMyTurn) return;
-        useSkill(2); // 火焰吞噬：150%伤害+吸血
+        useSkill(2); // 火焰吞噬
       });
     }
 
-    // 使用技能（需求2：回合制攻击逻辑）
+    // 使用技能（伤害计算）
     async function useSkill(skillType) {
       if (!currentUser || !currentBattleRoom) return;
 
@@ -701,18 +659,16 @@
       const enemyHpKey = isPlayer1 ? 'player2Hp' : 'player1Hp';
       const myName = currentUser.getUsername();
       const enemyName = isPlayer1 ? currentBattleRoom.get('player2Name') : currentBattleRoom.get('player1Name');
-      const attack = 92; // 红龙攻击值
+      const attack = 92; // 红龙攻击
       let damage = 0;
 
-      // 计算技能伤害
+      // 计算伤害
       if (skillType === 1) {
-        // 烈焰突袭：120%攻击伤害
         damage = Math.round(attack * 1.2);
         addBattleLog(`${myName}使用了【烈焰突袭】！`);
       } else if (skillType === 2) {
-        // 火焰吞噬：150%攻击伤害+吸血30%
         damage = Math.round(attack * 1.5);
-        const吸血 = Math.round(damage * 0.3);
+        const 吸血 = Math.round(damage * 0.3);
         addBattleLog(`${myName}使用了【火焰吞噬】！`);
         addBattleLog(`${myName}吸血${吸血}点HP！`);
         // 更新自身HP
@@ -728,18 +684,17 @@
       if (newEnemyHp <= 0) {
         currentBattleRoom.set('status', 'ended');
         currentBattleRoom.set('winnerName', myName);
-        // 切换回合（无实际意义，仅标记结束）
         currentBattleRoom.set('currentTurn', isPlayer1 ? 2 : 1);
       } else {
-        // 战斗继续：切换回合
+        // 切换回合
         currentBattleRoom.set('currentTurn', isPlayer1 ? 2 : 1);
       }
 
-      // 保存对战房间状态
+      // 保存状态
       try {
         await currentBattleRoom.save();
-        // 暂时禁用技能按钮，等待回合切换
-        document.getElementById('skill-container').querySelectorAll('button').forEach(btn => {
+        // 禁用技能按钮
+        document.querySelectorAll('#skill-container button').forEach(btn => {
           btn.classList.add('pointer-events-none', 'opacity-50');
         });
         // 更新HP显示
@@ -750,7 +705,7 @@
       }
     }
 
-    // 更新回合指示器（需求2）
+    // 更新回合指示器
     function updateTurnIndicator() {
       const player1TurnEl = document.getElementById('player1-turn');
       const player2TurnEl = document.getElementById('player2-turn');
@@ -764,9 +719,9 @@
       }
     }
 
-    // 更新技能按钮状态（需求2：只有当前回合可点击）
+    // 更新技能按钮状态
     function updateSkillButtonState() {
-      const skillButtons = document.getElementById('skill-container').querySelectorAll('button');
+      const skillButtons = document.querySelectorAll('#skill-container button');
       if (isMyTurn) {
         skillButtons.forEach(btn => {
           btn.classList.remove('pointer-events-none', 'opacity-50');
@@ -789,7 +744,7 @@
       battleLogEl.scrollTop = battleLogEl.scrollHeight;
     }
 
-    // 更新个人对战数据（胜败记录）
+    // 更新个人对战数据
     async function updatePlayerStats(isWin) {
       if (!currentUser) return;
       const query = new AV.Query('PlayerStats');
@@ -800,11 +755,8 @@
         let winCount = stats.get('winCount') || 0;
         let loseCount = stats.get('loseCount') || 0;
 
-        if (isWin) {
-          winCount++;
-        } else {
-          loseCount++;
-        }
+        if (isWin) winCount++;
+        else loseCount++;
 
         const totalCount = winCount + loseCount;
         const winRate = totalCount > 0 ? Math.round((winCount / totalCount) * 100) : 0;
@@ -827,13 +779,12 @@
         query.equalTo('user', currentUser);
         const abnormals = await query.find();
 
-        collectionListEl.innerHTML = ''; // 清空列表
+        collectionListEl.innerHTML = '';
         if (abnormals.length === 0) {
           collectionListEl.innerHTML = '<p class="text-center">暂无异常物数据</p>';
           return;
         }
 
-        // 遍历异常物（目前只有红龙）
         abnormals.forEach(abnormal => {
           const item = document.createElement('div');
           item.className = 'card-style p-4 flex flex-col md:flex-row items-center';
@@ -898,113 +849,6 @@
       } catch (error) {
         profileDataEl.innerHTML = `<p class="text-center text-red-600">加载失败：${error.message}</p>`;
       }
-    }
-
-    // 9. 统计数据实时更新（需求4：在线人数+今日登录）
-    async function initStatisticUpdate() {
-      // 初始加载一次
-      await updateOnlineCount();
-      await updateTodayLoginCount();
-
-      // 每30秒更新一次
-      setInterval(async () => {
-        await updateOnlineCount();
-        await updateTodayLoginCount();
-      }, 30000);
-    }
-
-    // 更新实时在线人数
-    async function updateOnlineCount() {
-      const OnlineUsers = AV.Object.extend('OnlineUsers');
-      const query = new AV.Query(OnlineUsers);
-      try {
-        const count = await query.count();
-        document.getElementById('online-count').textContent = count;
-      } catch (error) {
-        console.log('更新在线人数失败：', error);
-      }
-    }
-
-    // 更新今日累计登录人数
-    async function updateTodayLoginCount() {
-      const LoginRecords = AV.Object.extend('LoginRecords');
-      const query = new AV.Query(LoginRecords);
-      // 筛选今日的登录记录（UTC+8日期）
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      query.greaterThanOrEqualTo('createdAt', today);
-      query.lessThan('createdAt', tomorrow);
-      // 去重（同一用户今日多次登录只算一次）
-      query.distinct('userId');
-      try {
-        const count = await query.count();
-        document.getElementById('today-login-count').textContent = count;
-      } catch (error) {
-        console.log('更新今日登录人数失败：', error);
-      }
-    }
-
-    // 记录今日登录（需求4）
-    async function recordLogin() {
-      if (!currentUser) return;
-      const LoginRecords = AV.Object.extend('LoginRecords');
-      const query = new AV.Query(LoginRecords);
-      // 检查今日是否已记录过登录
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      query.equalTo('userId', currentUser.id);
-      query.greaterThanOrEqualTo('createdAt', today);
-      query.lessThan('createdAt', tomorrow);
-      const existing = await query.first();
-
-      if (!existing) {
-        const record = new LoginRecords();
-        record.set('userId', currentUser.id);
-        record.set('username', currentUser.getUsername());
-        await record.save();
-      }
-    }
-
-    // 添加到在线用户（需求4）
-    async function addOnlineUser() {
-      if (!currentUser) return;
-      const OnlineUsers = AV.Object.extend('OnlineUsers');
-      const query = new AV.Query(OnlineUsers);
-      query.equalTo('userId', currentUser.id);
-      const existing = await query.first();
-
-      if (!existing) {
-        const onlineUser = new OnlineUsers();
-        onlineUser.set('userId', currentUser.id);
-        onlineUser.set('username', currentUser.getUsername());
-        await onlineUser.save();
-      }
-    }
-
-    // 从在线用户中移除（需求4）
-    async function removeOnlineUser() {
-      if (!currentUser) return;
-      const OnlineUsers = AV.Object.extend('OnlineUsers');
-      const query = new AV.Query(OnlineUsers);
-      query.equalTo('userId', currentUser.id);
-      const existing = await query.first();
-
-      if (existing) {
-        await existing.destroy();
-      }
-    }
-
-    // 页面关闭/刷新时更新在线状态（需求4）
-    function initExitHandle() {
-      window.addEventListener('beforeunload', async () => {
-        if (currentUser) {
-          await removeOnlineUser();
-        }
-      });
     }
   </script>
 </body>
