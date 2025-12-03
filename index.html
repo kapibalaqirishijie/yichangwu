@@ -6,6 +6,23 @@
   
   <!-- 1. LeanCloud SDK 初始化（已填你的凭证） -->
   <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.15.1/dist/av-min.js"></script>
+  // 页面加载时检查用户状态
+window.onload = function() {
+  const currentUser = AV.User.current();
+  const loginContainer = document.getElementById('loginContainer'); // 你的登录界面容器ID
+  const gameContainer = document.getElementById('gameContainer'); // 你的游戏界面容器ID
+
+  // 如果没登录，显示登录界面；已登录显示游戏界面
+  if (currentUser) {
+    loginContainer.style.display = 'none';
+    gameContainer.style.display = 'block';
+    // 初始化游戏数据（比如加载异常物、个人信息）
+    initGameData(currentUser);
+  } else {
+    loginContainer.style.display = 'block';
+    gameContainer.style.display = 'none';
+  }
+};
   <script>
     const appId = "jbbgfC0tG7u5BNGPjAVrdBlJ-gzGzoHsz";
     const appKey = "zOYjnjqEOny7nUGpbAUy6UFQ";
@@ -571,3 +588,4 @@
 </body>
 
 </html>
+
